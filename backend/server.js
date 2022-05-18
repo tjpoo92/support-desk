@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv").config();
+const path = require("path");
 const colors = require("colors");
 const { errorHandler } = require("./middleware/errorMiddleware");
 const connectDB = require("./config/db");
@@ -18,6 +19,17 @@ app.get("/", (req, res) => {
 //Routes
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
+
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static(path.join(__dirname, "../frontend/build")));
+	app.get("*", (req, res) =>
+		res.sendFile(__dirname, "../", "frontend", "build", "index.html")
+	);
+} else {
+	app.get("/", (req, res) => {
+		res.json({ message: "Welcome to the Support Desk API" });
+	});
+}
 
 app.use(errorHandler);
 
